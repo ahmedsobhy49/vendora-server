@@ -13,3 +13,5 @@
 
     "joi": "^17.13.3",
     "yup": "^1.4.0"
+
+sudo mongod --dbpath /Users/ziadosama/data/db

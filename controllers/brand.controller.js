@@ -83,4 +83,32 @@ const getAllBrands = async (req, res) => {
   }
 };
 
-export { getAllBrands, addBrand, uploadSingleFile };
+const getBrandsByCategoryId = async (req, res) => {
+  const { categoryId } = req.params; // Get the category ID from the request params
+
+  try {
+    // Find brands that have the specified category ID in their categories array
+    const brands = await BrandModel.find({ categories: { $in: [categoryId] } });
+
+    // Check if any brands were found
+    if (brands.length === 0) {
+      return res.status(404).json({
+        message: "No brands found for the specified category ID",
+      });
+    }
+
+    // Return the found brands
+    return res.status(200).json({
+      message: "Brands retrieved successfully",
+      brands,
+    });
+  } catch (error) {
+    // Handle any errors
+    return res.status(500).json({
+      message: "Error retrieving brands",
+      error: error.message,
+    });
+  }
+};
+
+export { getAllBrands, addBrand, uploadSingleFile, getBrandsByCategoryId };

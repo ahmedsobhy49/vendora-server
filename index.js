@@ -7,6 +7,7 @@ import cookieParser from "cookie-parser";
 import dbConnect from "./db/db.js";
 import categoryRouter from "./routes/category.routes.js";
 import BrandRouter from "./routes/brand.routes.js";
+import productRouter from "./routes/product.routes.js";
 
 dotenvConfig();
 const port = process.env.PORT;
@@ -17,7 +18,7 @@ dbConnect();
 
 app.use(
   cors({
-    origin: ["http://localhost:5175"],
+    origin: ["http://localhost:5173", "http://localhost:5176"],
     credentials: true,
   })
 );
@@ -28,4 +29,5 @@ app.use("/uploads", express.static("uploads"));
 app.use("/api", authRouter);
 app.use("/api", categoryRouter);
 app.use("/api", BrandRouter);
+app.use("/api", productRouter);
 app.listen(port, () => console.log(`app listening on port ${port}!`));

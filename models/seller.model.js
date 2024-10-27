@@ -1,13 +1,14 @@
 import { Schema, model } from "mongoose";
 
 const sellerSchema = new Schema({
-  name: { type: String, required: true },
+  firstName: { type: String, required: true },
+  lastName: { type: String, required: true },
   image: { type: String },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   role: { type: String, required: true, default: "seller" },
-  status: { type: String, default: "active" },
-  phone: { type: String },
+  status: { type: String, default: "pending" },
+  phone: { type: String, required: true },
 
   businessInfo: {
     companyName: { type: String },
@@ -15,7 +16,8 @@ const sellerSchema = new Schema({
     taxId: { type: String },
   },
 
-  address: { type: Schema.Types.ObjectId, ref: "Address" },
+  // Make address optional
+  address: { type: Schema.Types.ObjectId, ref: "Address", required: false },
 
   bankDetails: {
     accountHolderName: { type: String },
@@ -39,7 +41,6 @@ const sellerSchema = new Schema({
   updatedAt: { type: Date, default: Date.now },
 });
 
-// Enable timestamps for automatic creation and update of `createdAt` and `updatedAt`
 sellerSchema.set("timestamps", true);
 
 const SellerModel = model("Seller", sellerSchema);

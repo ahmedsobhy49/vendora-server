@@ -6,4 +6,6 @@ const authRouter = Router();
 
 authRouter.post("/admin/login", authControllers.adminLogin);
 authRouter.get("/getuser", authMiddleWare, authControllers.getUser);
+authRouter.post("/auth/logout", authControllers.logout);
+
 export default authRouter;

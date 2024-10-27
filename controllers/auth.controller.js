@@ -32,6 +32,16 @@ class AuthControllers {
     }
   };
 
+  logout = async (req, res) => {
+    try {
+      // Clear the access token cookie
+      res.clearCookie("accessToken");
+      response(res, 200, { message: "Logout successful" });
+    } catch (error) {
+      response(res, 500, { message: error.message });
+    }
+  };
+
   getUser = async (req, res) => {
     const { id, role } = req;
     try {

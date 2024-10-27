@@ -5,11 +5,16 @@ import {
   getBrandsByCategoryId,
   uploadSingleFile,
 } from "../controllers/brand.controller.js";
+
 const BrandRouter = Router();
 
-BrandRouter.post("/brand/add-brand", uploadSingleFile, addBrand);
+// Create a new brand
+BrandRouter.post("/brands", uploadSingleFile, addBrand);
 
-BrandRouter.get("/brand/all-brands", getAllBrands);
-BrandRouter.get("/brands/category/:categoryId", getBrandsByCategoryId);
+// Get all brands
+BrandRouter.get("/brands", getAllBrands);
+
+// Get brands by category ID
+BrandRouter.get("/brands/by-category/:categoryId", getBrandsByCategoryId);
 
 export default BrandRouter;

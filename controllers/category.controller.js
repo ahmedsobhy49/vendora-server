@@ -168,6 +168,30 @@ const getFirstTwoLevelsOfCategories = async (req, res) => {
   }
 };
 
+const getCategoryById = async (req, res) => {
+  const { categoryId } = req.params;
+  try {
+    const category = await CategoryModel.findById(categoryId);
+
+    if (!category) {
+      return res.status(404).json({
+        message: "Category not found",
+      });
+    }
+
+    return res.status(200).json({
+      message: "Category retrieved successfully",
+      category,
+    });
+  } catch (error) {
+    console.error("Error retrieving category:", error); // Log the error to the console
+    return res.status(500).json({
+      message: "Error retrieving category",
+      error: error.message,
+    });
+  }
+};
+
 export {
   addCategory,
   getAllCategories,
@@ -176,4 +200,5 @@ export {
   getCategoriesByParentId,
   uploadSingleFile,
   getFirstTwoLevelsOfCategories,
+  getCategoryById,
 };

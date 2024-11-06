@@ -1,12 +1,28 @@
 import SellerModel from "../models/seller.model.js";
 import AddressModel from "../models/address.model.js";
 import bcrypt from "bcrypt"; // For password hashing
+import multer from "multer";
+import path from "path";
+
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "./uploads");
+  },
+  filename: function (req, file, cb) {
+    cb(
+      null,
+      `${file.fieldname}_${Date.now()}${path.extname(file.originalname)}`
+    );
+  },
+});
+
+const upload = multer({ storage });
+export const uploadSingleFile = upload.single("image");
 
 export const registerSeller = async (req, res) => {
   try {
     const {
       firstName,
-      image,
       lastName,
       email,
       password,
@@ -15,6 +31,8 @@ export const registerSeller = async (req, res) => {
       bankDetails,
       address,
     } = req.body;
+
+    const imagePath = req.file ? `/uploads/${req.file.filename}` : null;
 
     // Check if a seller with the same email already exists
     const existingSeller = await SellerModel.findOne({ email });
@@ -29,7 +47,7 @@ export const registerSeller = async (req, res) => {
     const newSeller = new SellerModel({
       firstName,
       lastName,
-      image,
+      image: imagePath, // Save the image path
       email,
       phone,
       password: hashedPassword,
@@ -65,6 +83,7 @@ export const registerSeller = async (req, res) => {
       .status(201)
       .json({ message: "Seller registered successfully, pending approval." });
   } catch (error) {
+    console.error("Error registering seller:", error); // Log the error for debugging
     return res.status(500).json({ message: "Error registering seller", error });
   }
 };
@@ -105,24 +124,132 @@ export const getActiveSellers = async (req, res) => {
   }
 };
 
-export const approveSeller = async (req, res) => {
-  const { id } = req.params;
+export const getInactiveSellers = async (req, res) => {
+  try {
+    // Fetch all sellers
+    const inactiveSellers = await SellerModel.find({ status: "inactive" });
+
+    return res.status(200).json({
+      success: true,
+      sellers: inactiveSellers,
+    });
+  } catch (error) {
+    console.error("Error fetching active sellers:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+export const updateSellerStatus = async (req, res) => {
+  const { sellerId } = req.params;
+  const { status } = req.body;
 
   try {
-    const seller = await SellerModel.findById(id);
+    const seller = await SellerModel.findById(sellerId);
     if (!seller) {
       return res
         .status(404)
         .json({ success: false, message: "Seller not found" });
     }
 
-    // Update the seller's status to approved
-    seller.status = "active"; // or any status you want to set for approved sellers
+    // Update the seller's status based on the provided status in the request
+    seller.status = status;
+
+    // Set activeAt if status is being changed to active
+    if (status === "active") {
+      seller.activeAt = Date.now();
+    }
+
     await seller.save();
 
-    return res.status(200).json({ success: true, message: "Seller approved" });
+    return res.status(200).json({
+      success: true,
+      message: `Seller status updated to ${status}`,
+    });
   } catch (error) {
-    console.error("Error approving seller:", error);
+    console.error("Error updating seller status:", error);
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal server error" });
+  }
+};
+
+export const getSellerById = async (req, res) => {
+  const { sellerId } = req.params;
+
+  try {
+    // Find the seller by ID and populate the address if it exists
+    const seller = await SellerModel.findById(sellerId).populate("address");
+
+    if (!seller) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Seller not found" });
+    }
+
+    return res.status(200).json({
+      success: true,
+      seller,
+    });
+  } catch (error) {
+    console.error("Error fetching seller by ID:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+export const getYearlySellerStatistics = async (req, res) => {
+  try {
+    const sellers = await SellerModel.find(
+      { status: "active" },
+      { activeAt: 1 }
+    );
+
+    // Initialize an object to count sellers by month
+    const monthlyCounts = Array(12).fill(0);
+    let totalYearlySellers = 0;
+
+    sellers.forEach((seller) => {
+      if (seller.activeAt) {
+        const month = seller.activeAt.getMonth(); // 0 for January, 1 for February, etc.
+        monthlyCounts[month]++;
+        totalYearlySellers++;
+      }
+    });
+
+    // Create an array with month names and counts
+    const months = [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December",
+    ];
+    const result = monthlyCounts.map((count, index) => ({
+      month: months[index],
+      count,
+    }));
+
+    // Add the yearly total
+    const response = {
+      yearTotal: totalYearlySellers,
+      monthlyStatistics: result,
+    };
+
+    return res.status(200).json(response);
+  } catch (error) {
+    console.error("Error fetching yearly seller statistics:", error);
     return res
       .status(500)
       .json({ success: false, message: "Internal server error" });

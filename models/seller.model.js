@@ -36,7 +36,7 @@ const sellerSchema = new Schema({
       completedAt: { type: Date },
     },
   ],
-
+  activeAt: { type: Date },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });

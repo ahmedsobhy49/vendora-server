@@ -15,6 +15,6 @@ BrandRouter.post("/brands", uploadSingleFile, addBrand);
 BrandRouter.get("/brands", getAllBrands);
 
 // Get brands by category ID
-BrandRouter.get("/brands/by-category/:categoryId", getBrandsByCategoryId);
+BrandRouter.get("/brands/category/:categoryId", getBrandsByCategoryId);
 
 export default BrandRouter;

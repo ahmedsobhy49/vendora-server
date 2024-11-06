@@ -1,4 +1,6 @@
 import { Schema, model } from "mongoose";
+import SellerModel from "./seller.model.js";
+import userModel from "./user.model.js";
 
 const addressSchema = new Schema({
   userId: {
@@ -9,7 +11,6 @@ const addressSchema = new Schema({
   userType: {
     type: String,
     enum: ["User", "Seller"],
-    required: true,
   },
 
   street: { type: String, required: true },
@@ -20,6 +21,26 @@ const addressSchema = new Schema({
   country: { type: String, required: true },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
+});
+
+// Pre-save middleware to automatically set userType
+addressSchema.pre("save", async function (next) {
+  if (!this.userType) {
+    const isUser = await userModel.exists({ _id: this.userId });
+    if (isUser) {
+      this.userType = "User";
+    } else {
+      const isSeller = await SellerModel.exists({ _id: this.userId });
+      if (isSeller) {
+        this.userType = "Seller";
+      } else {
+        return next(
+          new Error("Invalid userId: No matching user or seller found.")
+        );
+      }
+    }
+  }
+  next();
 });
 
 addressSchema.set("timestamps", true);

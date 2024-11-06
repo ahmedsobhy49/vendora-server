@@ -1,39 +1,54 @@
-import { Product } from "../models/product.model.js";
+import {
+  addProduct,
+  uploadMultipleFiles,
+  uploadProductImages,
+  getProductsBySeller,
+  getAllProducts,
+  getMonthlyProductStatisticsBySeller,
+} from "../controllers/product.controller.js";
+import Product from "../models/product.model.js";
 import { Router } from "express";
 
 const productRouter = Router();
-// Route to get all general products
-productRouter.get("/", async (req, res) => {
-  try {
-    const products = await Product.find({ __t: { $ne: "ClothingProduct" } }); // Exclude clothing products
-    res.json(products);
-  } catch (error) {
-    res.status(500).json({ error: "Server error" });
-  }
-});
+// // Route to get all general products
+// productRouter.get("/product", async (req, res) => {
+//   const { sellerId } = req.query; // Get the sellerId from query parameters
+//   console.log(sellerId);
+//   try {
+//     // Check if sellerId is provided
+//     if (!sellerId) {
+//       return res.status(400).json({ error: "Seller ID is required" });
+//     }
+
+//     // Find products by sellerId, excluding clothing products
+//     const products = await Product.find({
+//       sellerId: sellerId,
+//     });
+
+//     // Return the found products
+//     res.json(products);
+//   } catch (error) {
+//     console.error("Error fetching products:", error); // Log the error for debugging
+//     res.status(500).json({ error: "Server error" });
+//   }
+// });
 
 // Route to get a specific product by ID
-productRouter.get("/:id", async (req, res) => {
-  try {
-    const product = await Product.findById(req.params.id);
-    if (!product || product.__t === "ClothingProduct") {
-      return res.status(404).json({ message: "Product not found" });
-    }
-    res.json(product);
-  } catch (error) {
-    res.status(500).json({ error: "Server error" });
-  }
-});
+productRouter.get("/products/:sellerId", getProductsBySeller);
 
-// Route to add a new general product
-productRouter.post("/add/new/product", async (req, res) => {
-  try {
-    const newProduct = new Product(req.body); // Creating a new general product
-    await newProduct.save();
-    res.status(201).json(newProduct);
-  } catch (error) {
-    res.status(400).json({ error: error.message });
-  }
-});
+// Route to upload product images
+productRouter.post("/product/upload", uploadMultipleFiles, uploadProductImages);
+
+// Route to add a new product
+productRouter.post("/product", uploadMultipleFiles, addProduct);
+
+// Route to get all  products
+productRouter.get("/products", getAllProducts);
+
+// Route to get monthly product statistics for a specific seller
+productRouter.get(
+  "/products/sellers/monthly-stats/:sellerId",
+  getMonthlyProductStatisticsBySeller
+);
 
 export default productRouter;

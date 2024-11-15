@@ -3,16 +3,18 @@ import AddressModel from "../models/address.model.js";
 import bcrypt from "bcrypt"; // For password hashing
 import multer from "multer";
 import path from "path";
+import fs from "fs";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, "./uploads");
   },
   filename: function (req, file, cb) {
-    cb(
-      null,
-      `${file.fieldname}_${Date.now()}${path.extname(file.originalname)}`
-    );
+    cb(null, `seller_${Date.now()}${path.extname(file.originalname)}`);
   },
 });
 
@@ -33,7 +35,7 @@ export const registerSeller = async (req, res) => {
     } = req.body;
 
     const imagePath = req.file ? `/uploads/${req.file.filename}` : null;
-
+    console.log(imagePath);
     // Check if a seller with the same email already exists
     const existingSeller = await SellerModel.findOne({ email });
     if (existingSeller) {
@@ -253,5 +255,42 @@ export const getYearlySellerStatistics = async (req, res) => {
     return res
       .status(500)
       .json({ success: false, message: "Internal server error" });
+  }
+};
+
+export const deleteSellerById = async (req, res) => {
+  const { sellerId } = req.params;
+  try {
+    // Use findOneAndDelete to trigger the middleware
+
+    const deletedSeller = await SellerModel.findOneAndDelete({ _id: sellerId });
+    console.log("Image Path:", deletedSeller.image); // Log the image path
+    if (!deletedSeller) {
+      return res.status(404).json({
+        success: false,
+        message: "Seller not found",
+      });
+    }
+
+    // Delete the seller's image from the server (assuming images are stored in 'uploads' folder)
+    if (deletedSeller.image) {
+      const imagePath = path.join(__dirname, "..", deletedSeller.image); // Build absolute file path
+      console.log("Deleting Image:", imagePath); // Log the image path for debugging
+      if (fs.existsSync(imagePath)) {
+        fs.unlinkSync(imagePath); // Delete the image file
+        console.log("Image deleted successfully.");
+      }
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Seller and associated address deleted successfully",
+    });
+  } catch (error) {
+    console.error("Error deleting seller:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
   }
 };

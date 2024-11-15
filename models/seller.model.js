@@ -1,9 +1,9 @@
 import { Schema, model } from "mongoose";
-
+import addressModel from "./address.model.js";
 const sellerSchema = new Schema({
   firstName: { type: String, required: true },
   lastName: { type: String, required: true },
-  image: { type: String },
+  image: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   role: { type: String, required: true, default: "seller" },
@@ -42,6 +42,14 @@ const sellerSchema = new Schema({
 });
 
 sellerSchema.set("timestamps", true);
+
+// After defining the sellerSchema...
+
+sellerSchema.post("findOneAndDelete", async function (doc) {
+  if (doc?.address) {
+    await addressModel.findByIdAndDelete(doc.address);
+  }
+});
 
 const SellerModel = model("Seller", sellerSchema);
 

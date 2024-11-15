@@ -4,6 +4,7 @@ import {
   addBrand,
   getBrandsByCategoryId,
   uploadSingleFile,
+  deleteBrandById,
 } from "../controllers/brand.controller.js";
 
 const BrandRouter = Router();
@@ -16,5 +17,8 @@ BrandRouter.get("/brands", getAllBrands);
 
 // Get brands by category ID
 BrandRouter.get("/brands/category/:categoryId", getBrandsByCategoryId);
+
+// detet the brand by brand ID
+BrandRouter.delete("/brands/:brandId", deleteBrandById);
 
 export default BrandRouter;

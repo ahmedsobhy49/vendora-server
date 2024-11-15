@@ -1,4 +1,3 @@
-// User.js
 import { Schema, model } from "mongoose";
 
 const userSchema = new Schema({
@@ -6,20 +5,31 @@ const userSchema = new Schema({
   lastName: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
-  phone: { type: String },
+  phone: { type: String, required: true },
   role: { type: String, default: "user" },
 
-  // Reference to addresses
-  address: { type: Schema.Types.ObjectId, ref: "Address", required: false },
+  // Multiple addresses for flexibility
+  addresses: [{ type: Schema.Types.ObjectId, ref: "Address" }],
 
-  // Reference to cart
-  cartId: { type: Schema.Types.ObjectId, ref: "Cart", required: false },
+  // Reference to cart, wishlist, and orders
+  cartId: { type: Schema.Types.ObjectId, ref: "Cart" },
+  wishlistId: { type: Schema.Types.ObjectId, ref: "Wishlist" },
+  orders: [{ type: Schema.Types.ObjectId, ref: "Order" }],
 
-  // Reference to wishlist
-  wishlistId: { type: Schema.Types.ObjectId, ref: "Wishlist", required: false },
+  // Status and activity tracking
+  status: { type: String, default: "active" },
+  lastLogin: { type: Date },
+  loginAttempts: { type: Number, default: 0 },
+  lockUntil: { type: Date },
 
-  // Reference to orders
-  orders: [{ type: Schema.Types.ObjectId, ref: "Order", required: false }], // Add this line
+  // Verification and reset tokens
+  isVerified: { type: Boolean, default: false },
+  verificationToken: { type: String },
+  passwordResetToken: { type: String },
+  passwordResetExpires: { type: Date },
+
+  // Preferences and notifications
+  notificationPreferences: { type: Map, of: Boolean },
 
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },

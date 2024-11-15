@@ -7,10 +7,7 @@ const storage = multer.diskStorage({
     cd(null, "./uploads");
   },
   filename: function (req, file, cd) {
-    cd(
-      null,
-      `${file.fieldname}_${Date.now()}${path.extname(file.originalname)}`
-    );
+    cd(null, `category_${Date.now()}${path.extname(file.originalname)}`);
   },
 });
 

@@ -8,6 +8,7 @@ import {
   uploadSingleFile,
   getSellerById,
   getYearlySellerStatistics,
+  deleteSellerById,
 } from "../controllers/seller.controller.js"; // Adjust the path as needed
 
 const sellerRouter = express.Router();
@@ -32,5 +33,7 @@ sellerRouter.patch("/sellers/:sellerId/status", updateSellerStatus);
 
 // Route to get a specific seller by ID
 sellerRouter.get("/sellers/:sellerId", getSellerById);
+
+sellerRouter.delete("/sellers/:sellerId", deleteSellerById);
 
 export default sellerRouter;

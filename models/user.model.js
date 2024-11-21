@@ -7,9 +7,8 @@ const userSchema = new Schema({
   password: { type: String, required: true },
   phone: { type: String, required: true },
   role: { type: String, default: "user" },
-
-  // Multiple addresses for flexibility
-  addresses: [{ type: Schema.Types.ObjectId, ref: "Address" }],
+  gender: { type: String },
+  addresses: [{ type: Schema.Types.ObjectId, ref: "Address" }], // Multiple addresses for flexibility
 
   // Reference to cart, wishlist, and orders
   cartId: { type: Schema.Types.ObjectId, ref: "Cart" },

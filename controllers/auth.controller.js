@@ -109,7 +109,12 @@ class AuthControllers {
         user = await userModel
           .findById(id)
           .populate("addresses")
-          .populate("cartId")
+          .populate({
+            path: "cartId",
+            model: "Cart",
+            match: { userId: id }, // Add match to ensure you're getting the cart for this user
+          })
+
           .populate("wishlistId")
           .select("-password");
       } else {

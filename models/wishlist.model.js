@@ -3,7 +3,7 @@ import { Schema, model } from "mongoose";
 
 const wishlistSchema = new Schema({
   userId: { type: Schema.Types.ObjectId, ref: "User", required: true }, // Reference to User
-  products: [
+  items: [
     {
       productId: {
         type: Schema.Types.ObjectId,

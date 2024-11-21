@@ -6,7 +6,7 @@ const getAddressByUserId = async (req, res) => {
   const { userId } = req.params;
   try {
     // Find address associated with the user ID
-    const address = await AddressModel.findOne({ userId });
+    const address = await AddressModel.find({ userId });
     // Validate if userId is a valid ObjectId
     if (!mongoose.Types.ObjectId.isValid(userId)) {
       return res.status(400).json({ message: "Invalid user ID format." });
